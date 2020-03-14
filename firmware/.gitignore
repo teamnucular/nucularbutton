@@ -1,5 +1,6 @@
+CMakeLists.txt
 CMakeListsPrivate.txt
 cmake*
 .pio
-CMakeListsPrivate.txt
+.idea
 

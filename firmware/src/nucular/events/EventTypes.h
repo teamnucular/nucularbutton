@@ -2,7 +2,10 @@
 
 #include <inttypes.h>
 
-// -------------------------------------------------------------------------------------------------
+namespace nucular
+{
+
+// ---------------------------------------------------------------------------------------------------------------------
 // Receiver types
 
 enum class EntityType : uint8_t
@@ -11,7 +14,7 @@ enum class EntityType : uint8_t
     Switch2,
     Switch3,
     LoadedIndicator,
-    NucularButton,
+    PushButton,
     Undefined
 };
 
@@ -20,7 +23,7 @@ struct Event
     EntityType entity{ EntityType ::Undefined };
 };
 
-// -------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 // Generator types
 
 enum class SwitchState : uint8_t
@@ -46,7 +49,7 @@ enum class LoadedState : uint8_t
 
 template <class T> uint8_t toUint8(const T &t) { return static_cast<uint8_t>(t); }
 
-struct ThingState
+struct LaunchPanelState
 {
     SwitchState switch_1{ SwitchState ::Undefined };
     SwitchState switch_2{ SwitchState ::Undefined };
@@ -54,3 +57,5 @@ struct ThingState
     ButtonState push_button{ ButtonState ::Undefined };
     LoadedState loaded_indicator{ LoadedState ::Undefined };
 };
+
+} // namespace nucular

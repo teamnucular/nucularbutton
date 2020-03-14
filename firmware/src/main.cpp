@@ -1,17 +1,18 @@
-#include "nucular/NucularThing.h"
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+
+#include "nucular/NuclearLaunchPanel.h"
 #include "nucular/events/EventReceiver.h"
 #include <HardwareSerial.h>
 
-
+using nucular::EventReceiver;
+using nucular::NuclearLaunchPanel;
 
 // -------------------------------------------------------------------------------------------------
 
 struct SerialReader
 {
-    SerialReader(NucularThing &nucular_thing)
-    : nucular_thing(nucular_thing)
-    {
-    }
+    SerialReader(NuclearLaunchPanel &nucular_thing) : nucular_thing(nucular_thing) {}
 
     void setup() {}
     void process()
@@ -23,13 +24,13 @@ struct SerialReader
 
             if(0 == in.compareTo("speaker on"))
             {
-                nucular_thing.base.setSpeakerEnabled(true);
-                nucular_thing.storage.setIsSpeakerEnabled(true);
+                nucular_thing.base.enableSpeaker(true);
+                nucular_thing.configuration.setIsSpeakerEnabled(true);
             }
             else if(0 == in.compareTo("speaker off"))
             {
-                nucular_thing.base.setSpeakerEnabled(false);
-                nucular_thing.storage.setIsSpeakerEnabled(false);
+                nucular_thing.base.enableSpeaker(false);
+                nucular_thing.configuration.setIsSpeakerEnabled(false);
             }
             else if(0 == in.compareTo("help"))
             {
@@ -44,15 +45,14 @@ struct SerialReader
         }
     }
 
-    NucularThing &nucular_thing;
-
+    NuclearLaunchPanel &nucular_thing;
 };
 
-// -------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 struct Resources
 {
-    // ---------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
 
     struct EarlyInitializer
     {
@@ -66,28 +66,31 @@ struct Resources
         }
     } _;
 
-    // ---------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
 
     EventReceiver event_receiver;
-    NucularThing nucular_thing{ event_receiver };
-    SerialReader serial_reader{nucular_thing};
+    NuclearLaunchPanel nucular_thing{ event_receiver };
+    SerialReader serial_reader{ nucular_thing };
 
-    // ---------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
 
     void setup()
     {
         Serial.println("Resources::setup");
 
-        nucular_thing.storage.setup();
-        nucular_thing.storage.loadSettings();
+        WiFi.mode(WIFI_OFF);
+
+        nucular_thing.configuration.setup();
+        nucular_thing.configuration.loadSettings();
 
         nucular_thing.setup();
-        nucular_thing.base.setSpeakerEnabled(nucular_thing.storage.getIsSpeakerEnabled());
+        nucular_thing.base.enableSpeaker(nucular_thing.configuration.getIsSpeakerEnabled());
 
         serial_reader.setup();
     }
 
-    // ---------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
 
     void process()
     {
@@ -96,10 +99,10 @@ struct Resources
     }
 } r;
 
-// -------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 void setup() { r.setup(); }
 
-// -------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 void loop() { r.process(); }

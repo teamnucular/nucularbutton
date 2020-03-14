@@ -1,11 +1,16 @@
 #pragma once
 
-#include <HardwareSerial.h>
 #include "EventReceiverInterface.h"
+#include <HardwareSerial.h>
 
-// -------------------------------------------------------------------------------------------------
+namespace nucular
+{
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 struct EventReceiver : public EventReceiverInterface
 {
-    void takeEvent(const EventGenerator &generator, const Event &event) override;
+    void onEvent(const EventGenerator &generator, const Event &event) override;
 };
+
+} // namespace nucular

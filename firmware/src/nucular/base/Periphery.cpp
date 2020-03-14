@@ -1,28 +1,30 @@
 #include "Periphery.h"
 
-// -------------------------------------------------------------------------------------------------
+namespace nucular
+{
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 void Periphery::setup()
 {
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH); // led off
-
+    pinMode(BUILTIN_LED_OUT_PIN, OUTPUT);
     pinMode(SPEAKER_ON_OUT_PIN, OUTPUT);
-    setSpeakerEnabled(false);
 }
 
-// -------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
 void Periphery::process() {}
 
-// -------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
-void Periphery::setSpeakerEnabled(bool enable)
+void Periphery::enableSpeaker(bool on) { digitalWrite(BUILTIN_LED_OUT_PIN, (on) ? HIGH : LOW); }
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void Periphery::enableLed(bool on)
 {
-    if(enable)
-    {
-        digitalWrite(SPEAKER_ON_OUT_PIN, 1);
-        return;
-    }
-    digitalWrite(SPEAKER_ON_OUT_PIN, 0);
+    //!< LOW => LED on, HIGH => LED off
+    digitalWrite(BUILTIN_LED_OUT_PIN, (on) ? LOW : HIGH);
 }
+
+} // namespace nucular
