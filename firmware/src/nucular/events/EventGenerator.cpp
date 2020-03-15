@@ -13,7 +13,7 @@ EventGenerator::EventGenerator(EventReceiverInterface &receiver, const uint16_t 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-const LaunchPanelState &EventGenerator::getState() const { return thing_state; }
+const LaunchPanelState &EventGenerator::getState() const { return current_state; }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ void EventGenerator::process()
 
         if(EntityType ::Undefined != event.entity)
         {
-            thing_state = new_state;
+            current_state = new_state;
             if(nullptr != event_receiver) { event_receiver->onEvent(*this, event); }
         }
     }
@@ -67,23 +67,32 @@ const Event &EventGenerator::generateEvent(const LaunchPanelState &new_state) co
 {
     static Event current_event;
 
-    if(thing_state.switch_1 != new_state.switch_1) { current_event.entity = EntityType ::Switch1; }
-    else if(thing_state.switch_2 != new_state.switch_2)
+    // ensure priority: push button over switch 3 over loaded indicator over switch 2 over switch 1
+
+    if(current_state.push_button != new_state.push_button) { current_event.entity = EntityType ::PushButton; }
+
+    else if(current_state.switch_3 != new_state.switch_3)
     {
-        current_event.entity = EntityType ::Switch2;
-    }
-    else if(thing_state.switch_3 != new_state.switch_3)
-    {
+        // note: since EntityType::Switch3 and EntityType::LoadedIndicator occur with a slight time separation,
+        // in most cases the EntityType::Switch3 event overwrites the EntityType::LoadedIndicator (which is acceptable)
         current_event.entity = EntityType ::Switch3;
     }
-    else if(thing_state.loaded_indicator != new_state.loaded_indicator)
+
+    else if(current_state.loaded_indicator != new_state.loaded_indicator)
     {
         current_event.entity = EntityType ::LoadedIndicator;
     }
-    else if(thing_state.push_button != new_state.push_button)
+
+    else if(current_state.switch_2 != new_state.switch_2)
     {
-        current_event.entity = EntityType ::PushButton;
+        current_event.entity = EntityType ::Switch2;
     }
+
+    else if(current_state.switch_1 != new_state.switch_1)
+    {
+        current_event.entity = EntityType ::Switch1;
+    }
+
     else
     {
         current_event.entity = EntityType ::Undefined;
@@ -92,4 +101,4 @@ const Event &EventGenerator::generateEvent(const LaunchPanelState &new_state) co
     return current_event;
 }
 
-}
+} // namespace nucular

@@ -17,7 +17,7 @@ void Periphery::process() {}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void Periphery::enableSpeaker(bool on) { digitalWrite(BUILTIN_LED_OUT_PIN, (on) ? HIGH : LOW); }
+void Periphery::enableSpeaker(bool on) { digitalWrite(SPEAKER_ON_OUT_PIN, (on) ? HIGH : LOW); }
 
 // ---------------------------------------------------------------------------------------------------------------------
 

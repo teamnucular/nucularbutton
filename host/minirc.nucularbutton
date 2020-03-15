@@ -5,5 +5,5 @@ pu bits             8
 pu parity           N
 pu stopbits         1
 pu rtscts           No
-pu localecho        Yes
+#pu localecho        Yes
 pu addcarreturn     No 

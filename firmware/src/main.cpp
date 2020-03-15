@@ -14,38 +14,85 @@ struct SerialReader
 {
     SerialReader(NuclearLaunchPanel &nucular_thing) : nucular_thing(nucular_thing) {}
 
-    void setup() {}
+    void setup() { buffered_line.clear(); }
     void process()
     {
-        if(Serial.available() > 0)
-        {
-            String in = Serial.readStringUntil('\n');
-            in.trim();
+        if(!readLine()) return;
 
-            if(0 == in.compareTo("speaker on"))
-            {
-                nucular_thing.base.enableSpeaker(true);
-                nucular_thing.configuration.setIsSpeakerEnabled(true);
-            }
-            else if(0 == in.compareTo("speaker off"))
-            {
-                nucular_thing.base.enableSpeaker(false);
-                nucular_thing.configuration.setIsSpeakerEnabled(false);
-            }
-            else if(0 == in.compareTo("help"))
-            {
-                Serial.println("supported commands:");
-                Serial.println("  speaker on   -   enables the speaker");
-                Serial.println("  speaker off  -   disables the speaker");
-            }
-            else
-            {
-                Serial.println("SerialReader::process: Unknown command, try help.");
-            }
+        Serial.println();
+        if(0 == buffered_line.compareTo("speaker on"))
+        {
+            nucular_thing.base.enableSpeaker(true);
+            nucular_thing.configuration.setIsSpeakerEnabled(true);
+            nucular_thing.configuration.saveSettings();
         }
+        else if(0 == buffered_line.compareTo("speaker off"))
+        {
+            nucular_thing.base.enableSpeaker(false);
+            nucular_thing.configuration.setIsSpeakerEnabled(false);
+            nucular_thing.configuration.saveSettings();
+        }
+        else if(0 == buffered_line.compareTo("echo off"))
+        {
+            echo_on = false;
+        }
+        else if(0 == buffered_line.compareTo("echo on"))
+        {
+            echo_on = true;
+        }
+        else if(0 == buffered_line.compareTo("help"))
+        {
+            Serial.println("supported commands:");
+            Serial.print("  Speaker (currently ");
+            if(nucular_thing.configuration.getIsSpeakerEnabled())
+                Serial.println("[on]):");
+            else
+                Serial.println("[off]):");
+
+            Serial.println("    speaker on  -   enables the speaker");
+            Serial.println("    speaker off -   disables the speaker");
+
+            // -----
+
+            Serial.println("\n");
+            Serial.print("  Echo (currently ");
+            if(echo_on)
+                Serial.println("[on]):");
+            else
+                Serial.println("[off]):");
+
+            Serial.println("    echo on     - enables console echo");
+            Serial.println("    echo off    - disables console echo");
+        }
+        else
+        {
+            Serial.println("Unknown command, try help.");
+        }
+
+        buffered_line.clear();
     }
 
     NuclearLaunchPanel &nucular_thing;
+
+protected:
+    bool readLine()
+    {
+        while(Serial.available() > 0)
+        {
+            char c;
+            if(1 == Serial.read(&c, 1))
+            {
+                if(echo_on) Serial.write(c);
+                if((c == '\r' || c == '\n') && buffered_line.length() != 0) return true;
+                buffered_line.concat(c);
+            }
+        }
+
+        return false;
+    }
+
+    String buffered_line;
+    bool echo_on{ true };
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -78,6 +125,7 @@ struct Resources
     {
         Serial.println("Resources::setup");
 
+        //!< wifi off: additional power consumption and radiation leads to erratic behaviour
         WiFi.mode(WIFI_OFF);
 
         nucular_thing.configuration.setup();
@@ -89,7 +137,6 @@ struct Resources
         serial_reader.setup();
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
 
     void process()
